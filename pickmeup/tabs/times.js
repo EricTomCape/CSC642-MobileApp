@@ -1,56 +1,36 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Picker, Modal} from 'react-native';
+import { Text, View, FlatList, TouchableOpacity, Picker, Modal} from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import styles from '../src/style';
 
+import { addTime, removeTime, updateTime } from "../src/actions/timeActions";
+
+import { connect } from 'react-redux';
+
 const setTimes = [
     {
+      conPerms: "All",
+      tbc: "3",
+      cb: "3",
       startTime: '00:00',
       endTime: '00:00',
       key: 1,
     },
-  
-    {
-      startTime: '00:00',
-      endTime: '00:00',
-      key: 2,
-    },
-  
-    {
-      startTime: '00:00',
-      endTime: '00:00',
-      key: 3,
-    },
-  
-    {
-      startTime: '00:00',
-      endTime: '00:00',
-      key: 4,
-    },
   ];
   
-  function ModularTimes({time1, time2, id}) {
+  function ModularTimes({time, removeTime, updateTime}) {
     const [viewState, setState] = useState(true);
-    const [time1State, set1State] = useState(time1.toString());
-    const [time2State, set2State] = useState(time2.toString());
-    const [selectedValue1, setSelectedValue1] = useState("All");
-    const [selectedValue2, setSelectedValue2] = useState("3");
-    const [selectedValue3, setSelectedValue3] = useState("3");
-    const [tempTime1, setTemp1] = useState(time1State);
-    const [tempTime2, setTemp2] = useState(time1State);
     const [modalVisible, setModalVisible] = useState(false);
+
+    const [tempPerms, setTempPerms] = useState(time.conPerms);
+    const [tempTBC, setTempTBC] = useState(time.tbc);
+    const [tempCB, setTempCB] = useState(time.cb);
+
+    const [tempTime1, setTemp1] = useState(time.startTime);
+    const [tempTime2, setTemp2] = useState(time.endTime);
   
     const clickHandler = () => {
       setState(!viewState);}
-  
-    const time1Handler = ( time ) => {
-      set1State(time.toString());
-    }
-  
-    const time2Handler = ( time ) => {
-      set2State(time.toString());
-    }
-  
   
     return(
       <View style={{marginVertical: 10, alignItems: 'center'}}>
@@ -71,7 +51,7 @@ const setTimes = [
                 style={{width: 100, height: 50, backgroundColor: 'green', alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, borderRadius: 15}}
                 onPress={() => {
                   setModalVisible(!modalVisible);
-                  clickHandler();
+                  removeTime(time.key);
                 }}
               >
                 <Text style={styles.whiteText}>Yes</Text>
@@ -93,7 +73,7 @@ const setTimes = [
   
       {viewState && <TouchableOpacity style={styles.contact} onPress={clickHandler}>
           <View style={{justifyContent: "center", alignItems: 'center', flex: 1}}>
-            <Text style={{fontSize: 30}}>{time1State} - {time2State} </Text>
+            <Text style={{fontSize: 30}}>{time.startTime} - {time.endTime} </Text>
           </View>
         </TouchableOpacity>}
   
@@ -114,8 +94,8 @@ const setTimes = [
   
             <View style={{marginVertical: 20}}>
               <Text style={{ fontSize: 18, textAlign: 'center'}}> Permitted Contacts -  
-              <Picker selectedValue={selectedValue1}
-                onValueChange={(itemValue, itemIndex) => setSelectedValue1(itemValue)}
+              <Picker selectedValue={tempPerms}
+                onValueChange={(itemValue, itemIndex) => setTempPerms(itemValue)}
                 style={{height: 18, width: 120}}>
                 <Picker.Item label="All" value="All"/>
                 <Picker.Item label="Contact List" value="ContactList"/>
@@ -125,8 +105,8 @@ const setTimes = [
   
             <View style={{marginVertical: 20}}>
               <Text style={{ fontSize: 18, textAlign: 'center'}}> Number of Calls -  
-              <Picker selectedValue={selectedValue2}
-                onValueChange={(itemValue, itemIndex) => setSelectedValue2(itemValue)}
+              <Picker selectedValue={tempCB}
+                onValueChange={(itemValue, itemIndex) => setTempCB(itemValue)}
                 style={{height: 18, width: 100}}>
                 <Picker.Item label="1" value="1"/>
                 <Picker.Item label="2" value="2"/>
@@ -138,8 +118,8 @@ const setTimes = [
   
             <View style={{marginVertical: 20}}>
               <Text style={{ fontSize: 18, textAlign: 'center'}}> Time Between Calls -  
-              <Picker selectedValue={selectedValue3}
-                onValueChange={(itemValue, itemIndex) => setSelectedValue3(itemValue)}
+              <Picker selectedValue={tempTBC}
+                onValueChange={(itemValue, itemIndex) => setTempTBC(itemValue)}
                 style={{height: 18, width: 120}}>
                 <Picker.Item label="1 Minute" value="1"/>
                 <Picker.Item label="2 Minutes" value="2"/>
@@ -158,8 +138,14 @@ const setTimes = [
                   justifyContent: "center",}}
                   onPress={() => {
                   clickHandler();
-                  time1Handler(tempTime1);
-                  time2Handler(tempTime2);
+                  updateTime({
+                    startTime: tempTime1,
+                    endTime: tempTime2,
+                    cb: tempCB,
+                    tbc: tempTBC,
+                    conPerms: tempPerms,
+                    key: time.key
+                  });
                 }}>
               <Text style={styles.whiteText}>Set Time</Text>
             </TouchableOpacity>
@@ -182,16 +168,35 @@ const setTimes = [
       </View>
     );}
 
-export default function Times() {
+class Times extends React.Component {
+    render() {
     return (
       <View style={styles.container}>
   
-    <FlatList  data={setTimes}
-      renderItem={({ item }) => <ModularTimes time1={item.startTime} time2={item.endTime} id={item.key}/>}/>
+    <FlatList  data={this.props.times}
+      renderItem={({ item }) => <ModularTimes time={item}
+                                removeTime={this.props.removeTime}
+                                updateTime={this.props.updateTime}/>}/>
   
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity style={styles.addButton} onPress={() => this.props.addTime()}>
         <Text style={{color: 'white', fontSize: 14 }}>Add</Text>
       </TouchableOpacity>
     </View>
     ); }
-  
+  }
+
+  const mapStateToProps = (state) => {
+    return {
+      times: state.times,
+    }
+  }
+
+  const mapDispatchToProps = (dispatch) => {
+    return {
+      addTime: () => {dispatch(addTime())},
+      removeTime: (key) => {dispatch(removeTime(key))},
+      updateTime: (time) => {dispatch(updateTime(time))},
+    }
+  }
+
+  export default connect(mapStateToProps, mapDispatchToProps)(Times);

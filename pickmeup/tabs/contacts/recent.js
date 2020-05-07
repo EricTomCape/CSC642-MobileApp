@@ -2,43 +2,7 @@ import React, { useState } from 'react';
 import { Text, View, FlatList, TouchableOpacity, StatusBar, Image } from 'react-native';
 import styles from '../../src/style';
 
-const RECENT = [
-    {
-      key: '1',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",
-    },
-
-    {
-      key: '2',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",    
-    },
-
-    {
-      key: '3',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",    
-    },
-
-    {
-      key: '4',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",    
-    },
-
-    {
-      key: '5',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",    
-    },
-
-    {
-      key: '6',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",    
-    },
-  ];
+import { connect } from 'react-redux';
 
   function RecentNumber({ name, number }) {
 
@@ -80,11 +44,20 @@ const RECENT = [
     </View>
     ); }
 
-export default function Recent() {
+class Recent extends React.Component {
+  render() {
   return(
     <View style={{alignItems: 'center', backgroundColor: '#262626', flex: 1}}>
-      <FlatList  data={RECENT}
+      <FlatList  data={this.props.recent}
       renderItem={({ item }) => <RecentNumber name={item.name} number={item.number}/>}/>
    </View>
-  );
+  );}
 }
+
+const mapStateToProps = (state) => {
+  return {
+    recent: state.recent
+  }
+}
+
+export default connect(mapStateToProps)(Recent);

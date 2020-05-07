@@ -1,84 +1,71 @@
 import React, { useState } from 'react';
 import { Text, View, FlatList, TouchableOpacity, StatusBar, Image } from 'react-native';
 import styles from '../../src/style';
+import { render } from 'react-dom';
+import { removeBlocked, addContact } from "../../src/actions/contactActions";
 
-const RECENT = [
-    {
-      key: '1',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",
-    },
+import { connect } from 'react-redux';
 
-    {
-      key: '2',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",    
-    },
+function BlockedNumber({ contact, removeBlocked, addContact}) {
 
-    {
-      key: '3',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",    
-    },
+  const [viewState, setState] = useState(false);
 
-    {
-      key: '4',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",    
-    },
+  const clickHandler = () => {
+    setState(!viewState);}
 
-    {
-      key: '5',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",    
-    },
-
-    {
-      key: '6',
-      name: 'Matthew "Cookie" Davis',
-      number: "1-650-576-9102",    
-    },
-  ];
-
-function BlockedNumber({ name, number }) {
-
-    const [viewState, setState] = useState(false);
-  
-    const clickHandler = () => {
-      setState(!viewState);}
-  
-    return(
-    <View style={{marginVertical: 10}}>
-    <TouchableOpacity style={styles.contact} onPress={clickHandler}>
-      <Image
-        style={styles.tinyLogo}
-        source={{
-          uri: 'https://reactnative.dev/img/tiny_logo.png',
-        }}
-      />
-      <View style={{justifyContent: 'center'}}>
-        <Text>  Name: { name } </Text>
-        <Text>  Number: {number}</Text>
-      </View>
-  
-    </TouchableOpacity>
-    {viewState && 
-        <View style={{width: 300, height: 75, backgroundColor: 'darkgrey', borderRadius: 15}}>
-          <View style={{flex: 1,  alignItems: 'center', justifyContent: 'center'}}> 
-              <TouchableOpacity
-                style={{width: 100, height: 50, backgroundColor: 'green', alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, borderRadius: 15}}>
-                <Text style={styles.whiteText}>Unblock</Text>
-              </TouchableOpacity>
-          </View>
-        </View>}
+  return(
+  <View style={{marginVertical: 10}}>
+  <TouchableOpacity style={styles.contact} onPress={clickHandler}>
+    <Image
+      style={styles.tinyLogo}
+      source={{
+        uri: 'https://reactnative.dev/img/tiny_logo.png',
+      }}
+    />
+    <View style={{justifyContent: 'center'}}>
+      <Text>  Name: { contact.name } </Text>
+      <Text>  Number: {contact.number}</Text>
     </View>
-    ); }
+
+  </TouchableOpacity>
+  {viewState && 
+      <View style={{width: 300, height: 75, backgroundColor: 'darkgrey', borderRadius: 15}}>
+        <View style={{flex: 1,  alignItems: 'center', justifyContent: 'center'}}> 
+            <TouchableOpacity onPress={() => {removeBlocked(contact.key); addContact(contact)}}
+              style={{width: 100, height: 50, backgroundColor: 'green', alignItems: 'center', justifyContent: 'center', marginHorizontal: 20, borderRadius: 15}}>
+              <Text style={styles.whiteText}>Unblock</Text>
+            </TouchableOpacity>
+        </View>
+      </View>}
+  </View>
+  ); }
   
-  export default function Blocked() {
+  class Blocked extends React.Component {
+
+    render() {
+
     return(
       <View style={{backgroundColor: '#262626', flex: 1, alignContent: 'center', alignItems: 'center'}}>
-      <FlatList  data={RECENT}
-      renderItem={({ item }) => <BlockedNumber name={item.name} number={item.number}/>}/>
+      <FlatList  data={this.props.blocked}
+      renderItem={({ item }) => <BlockedNumber contact={item} 
+                                removeBlocked={this.props.removeBlocked}
+                                addContact={this.props.addContact}/>}/>
    </View>
     );
+    }
   }
+
+  const mapStateToProps = (state) => {
+    return {
+      blocked: state.blocked
+    }
+  }
+
+  const mapDispatchToProps = (dispatch) => {
+    return {
+      removeBlocked: (key) => {dispatch(removeBlocked(key))},
+      addContact: (contact) => {dispatch(addContact(contact))}
+    }
+  }
+
+  export default connect(mapStateToProps, mapDispatchToProps)(Blocked);
