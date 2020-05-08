@@ -24,7 +24,6 @@ export const addContact = (contact) => {
         type: 'ADD_CONTACT',
         contact: contact,
         isContact: true
-        //icon: contact.icon
     }
 }
 
@@ -38,10 +37,8 @@ export const addBlocked = (contact) => {
 export const addRecent = (contact) => {
     return {
         type: 'ADD_RECENT',
-        name: contact.name,
-        number: contact.number,
-        isContact: contact.isContact,
-        //icon: contact.icon
+        contact: contact,
+        //isContact: contact.isContact,
     }
 }
 
@@ -63,4 +60,10 @@ export const setContacts = (contacts) => {
         type: "SET_CONTACTS",
         contacts: contacts
     }
+}
+
+export const trimRecent = () => {
+    return {
+        type: "TRIM_RECENT"
+    } 
 }

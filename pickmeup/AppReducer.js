@@ -34,7 +34,6 @@ const appReducer = (state = initState, action) => {
                 }
             });
             initContacts.sort(function(a, b){return a.id - b.id});
-            initContacts.map(element => console.log(element.id));
             return {
                 
                 ...state,
@@ -84,15 +83,15 @@ const appReducer = (state = initState, action) => {
 
         case 'ADD_RECENT':
             key = makeKey();
+            newRecent = {
+                ...action.contact,
+                key: key,
+                timeRecieved: Date.now()/1000
+            }
             return {
                 ...state,
-                recent: [...state.recent, 
-                    {
-                        key: key,
-                        name: action.name,
-                        number: action.number,
-                        isContact: action.isContact
-                    }]
+                recent: [ newRecent,
+                    ...state.recent]
             }
 
         case 'UPDATE_PERMISSIONS':
@@ -144,6 +143,18 @@ const appReducer = (state = initState, action) => {
                 ...state,
                 times: updateTimes
             }
+
+        case 'TRIM_RECENT':
+            let currentTBC = parseInt(state.tbc, 10)*60;
+            let currentTime = Date.now()/1000;
+
+            let trimmedRecent = state.recent.filter(element => ((currentTime - element.timeRecieved) <= currentTBC));
+
+            return {
+                ...state,
+                recent: trimmedRecent
+            }
+
 
         default:
             return state;

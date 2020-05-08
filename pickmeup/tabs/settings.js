@@ -3,19 +3,87 @@ import {Text, View, TouchableOpacity, Picker, Modal} from 'react-native';
 import styles from '../src/style';
 
 import { updatePermissions, updateTBC, updateCB } from "../src/actions/settingActions";
+import { addRecent, trimRecent } from "../src/actions/contactActions";
 
 import { connect } from 'react-redux';
+import { SliderVolumeController } from 'react-native-volume-controller';
 
 
   class Settings extends React.Component {
 
     constructor(props) {
       super(props);
-      this.state = {modalVisible: false}
+      this.state = {
+        modalVisible: false,
+        dummyContact:  {
+          contactType: "person",
+          firstName: "Dad",
+          id: "132",
+          imageAvailable: false,
+          lookupKey: "3569i9f4664e0ad002f4",
+          name: "Dad",
+          phoneNumbers: [
+             {
+              id: "234",
+              isPrimary: 0,
+              label: "mobile",
+              number: "650-906-3024",
+              type: "2",
+            },
+          ],
+        },
+      }
     }
 
     setModal(param) {
       this.setState({modalVisible: !param})
+    }
+
+    /*
+  onEvent.Call() => {
+    if(call == incoming) {
+      //add call to array as num + time
+      //walk through the array, check time vs incoming
+      //check num vs incoming
+      //increment cnt variable for number of calls within time limit
+      if (cnt >= setLimit){
+        //set volume to max
+      }
+      //set cnt = 0
+    } else (call == disconnecting) {
+
+    }
+  }
+*/
+
+    recentTest = (contact) => {
+
+      let testContact = {
+        ...contact,
+        timeRecieved: Date.now()/1000
+      }
+
+      this.props.addRecent(contact);
+
+      let timeBetween = parseInt(this.props.tbc) * 60;
+      let callsBetween = parseInt(this.props.cb);
+
+      console.log(timeBetween);
+      console.log(callsBetween);
+
+      let recentArray = this.props.recent.filter(element => 
+                                                ((testContact.timeRecieved-element.timeRecieved) <= timeBetween) 
+                                                && (contact.phoneNumbers[0].number === element.phoneNumbers[0].number));
+
+      console.log(recentArray);
+      console.log()
+      if (recentArray.length >= callsBetween){
+        console.log(recentArray.length);
+        //SliderVolumeController.change(100);
+      }
+
+      this.props.trimRecent();
+
     }
 
     render() {
@@ -102,6 +170,13 @@ import { connect } from 'react-redux';
   
       <TouchableOpacity style={styles.resetbutton}
                   onPress={() => {
+                    this.recentTest(this.state.dummyContact);
+                }}>
+        <Text style={styles.whiteText}>Test Recent</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.resetbutton}
+                  onPress={() => {
                     this.setModal(this.state.modalVisible);
                 }}>
         <Text style={styles.whiteText}>Reset</Text>
@@ -115,7 +190,10 @@ import { connect } from 'react-redux';
     return {
       conPerms: state.conPerms,
       tbc: state.tbc,
-      cb: state.cb
+      cb: state.cb,
+      contacts: state.contacts,
+      recent: state.recent,
+      blocked: state.blocked
     }
   }
 
@@ -123,7 +201,9 @@ import { connect } from 'react-redux';
     return {
       updatePermissions: (perm) => {dispatch(updatePermissions(perm))},
       updateTBC: (tbc) => {dispatch(updateTBC(tbc))},
-      updateCB: (cb) => {dispatch(updateCB(cb))}
+      updateCB: (cb) => {dispatch(updateCB(cb))},
+      addRecent: (contact) => {dispatch(addRecent(contact))},
+      trimRecent: () => {dispatch(trimRecent())}
     }
   }
 
