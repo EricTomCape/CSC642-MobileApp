@@ -1,8 +1,11 @@
-import React, { Component, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, FlatList, TouchableOpacity, StatusBar, Image } from 'react-native';
 import styles from '../../src/style';
+import * as Contacts from 'expo-contacts';
+import * as Permissions from 'expo-permissions';
 
-import { addBlocked, removeContact } from "../../src/actions/contactActions";
+import { addBlocked, removeContact, setContacts } from "../../src/actions/contactActions";
+
 
 import { connect } from 'react-redux';
 
@@ -25,7 +28,7 @@ import { connect } from 'react-redux';
       />
       <View style={{justifyContent: 'center'}}>
         <Text>  Name: { contact.name } </Text>
-        <Text>  Number: {contact.number}</Text>
+        <Text>  Number: {contact.phoneNumbers[0].number}</Text>
       </View>
   
     </TouchableOpacity>
@@ -42,7 +45,28 @@ import { connect } from 'react-redux';
     </View>
     ); }
   
-  class Contacts extends React.Component {
+  class Contactlst extends React.Component {
+
+    async componentDidMount () {
+          // Ask for permission to query contacts.
+    const permission = await Permissions.askAsync(Permissions.CONTACTS);
+  
+    if (permission.status !== 'granted') {
+      // Permission was denied...
+      return;
+    }
+    const contacts = await Contacts.getContactsAsync({
+      fields: [
+        Contacts.Fields.PhoneNumbers
+      ],
+      pageSize: 10,
+      pageOffset: 0,
+    });
+    if (contacts.total > 0) {
+      this.props.setContacts(contacts);
+    }
+    }
+
     render() {
     return(
         <View style={{alignItems: 'center', backgroundColor: '#262626', flex: 1}}>
@@ -64,9 +88,11 @@ import { connect } from 'react-redux';
   
   const mapDispatchToProps = (dispatch) => {
     return {
+      setContacts: (contacts) => {dispatch(setContacts(contacts))},
       addBlocked: (contact) => {dispatch(addBlocked(contact))},
       removeContact: (key) => {dispatch(removeContact(key))}
     }
   }
 
-  export default connect(mapStateToProps, mapDispatchToProps)(Contacts);
+
+  export default connect(mapStateToProps, mapDispatchToProps)(Contactlst);

@@ -10,10 +10,6 @@ import appReducer from './AppReducer';
 import Logbook from './tabs/logbook';
 import Times from './tabs/times';
 import Settings from './tabs/settings';
-import { setContacts } from "./src/actions/contactActions.js";
-
-import { PermissionsAndroid } from 'react-native';
-import ContactLog from 'react-native-contacts';
 
 import CallDetectorManager from 'react-native-call-detection';
 
@@ -40,23 +36,7 @@ import CallDetectorManager from 'react-native-call-detection';
 
 const store = createStore(appReducer);
 
-PermissionsAndroid.request(
-  PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
-  {
-    'title': 'Contacts',
-    'message': 'This app would like to view your contacts.',
-    'buttonPositive': 'Please accept bare mortal'
-  }
-).then(() => {
-  ContactLog.getAll((err, cont) => {
-    if (err === 'denied'){
-      // error
-    } else {
-      // contacts returned in Array
-      store.dispatch(setContacts(cont));
-    }
-  })
-});
+
 
 const MainTabs = createMaterialTopTabNavigator();
 
@@ -67,35 +47,41 @@ export default class App extends React.Component {
     this.startListenerTapped = this.startListenerTapped.bind(this);
   }
 
-  startListenerTapped() {
-    this.callDetector = new CallDetectorManager((event, phoneNumber) => {
-    // For iOS event will be either "Connected",
-    // "Disconnected","Dialing" and "Incoming"
-  
-    // For Android event will be either "Offhook",
-    // "Disconnected", "Incoming" or "Missed"
-    // phoneNumber should store caller/called number
-  
-  
-    if (event === 'Incoming') {
-      // Do something call got incoming
-      console.log("I ran.");
-      }
-    
-    },
-    false, // if you want to read the phone number of the incoming call [ANDROID], otherwise false
-    ()=>{}, // callback if your permission got denied [ANDROID] [only if you want to read incoming number] default: console.error
-    {
-    title: 'Phone State Permission',
-    message: 'This app needs access to your phone state in order to react and/or to adapt to incoming calls.'
-    } // a custom permission request message to explain to your user, why you need the permission [recommended] - this is the default one
-    )
-  }
 
-  componentWillMount() {
-    console.log("I ran.");
-    this.startListenerTapped;
-  }
+
+
+
+  async componentDidMount() {
+    this.startListenerTapped();
+}
+
+
+
+    startListenerTapped() {
+      console.log("I ran.");
+      this.callDetector = new CallDetectorManager((event, phoneNumber) => {
+      // For iOS event will be either "Connected",
+      // "Disconnected","Dialing" and "Incoming"
+    
+      // For Android event will be either "Offhook",
+      // "Disconnected", "Incoming" or "Missed"
+      // phoneNumber should store caller/called number
+      console.log("I also ran.");
+    
+      if (event === 'Incoming') {
+        // Do something call got incoming
+        console.log("I ran.");
+        }
+      
+      },
+       // if you want to read the phone number of the incoming call [ANDROID], otherwise false
+      ()=>{}, // callback if your permission got denied [ANDROID] [only if you want to read incoming number] default: console.error
+      {
+      title: 'Phone State Permission',
+      message: 'This app needs access to your phone state in order to react and/or to adapt to incoming calls.'
+      } // a custom permission request message to explain to your user, why you need the permission [recommended] - this is the default one
+      )
+    }
 
 render() {
   return (

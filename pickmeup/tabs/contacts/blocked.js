@@ -24,7 +24,7 @@ function BlockedNumber({ contact, removeBlocked, addContact}) {
     />
     <View style={{justifyContent: 'center'}}>
       <Text>  Name: { contact.name } </Text>
-      <Text>  Number: {contact.number}</Text>
+      <Text>  Number: {contact.phoneNumbers[0].number}</Text>
     </View>
 
   </TouchableOpacity>

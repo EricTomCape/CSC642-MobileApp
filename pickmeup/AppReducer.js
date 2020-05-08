@@ -8,43 +8,7 @@ const initState = {
         key: "1",
       },],
     contacts: [],
-    blocked: [
-        {
-          key: '1',
-          name: 'Matthew "Cookie" Davis',
-          number: "1-650-576-9102",
-        },
-    
-        {
-          key: '2',
-          name: 'Matthew "Cookie" Davis',
-          number: "1-650-576-9102",    
-        },
-    
-        {
-          key: '3',
-          name: 'Matthew "Cookie" Davis',
-          number: "1-650-576-9102",    
-        },
-    
-        {
-          key: '4',
-          name: 'Matthew "Cookie" Davis',
-          number: "1-650-576-9102",    
-        },
-    
-        {
-          key: '5',
-          name: 'Matthew "Cookie" Davis',
-          number: "1-650-576-9102",    
-        },
-    
-        {
-          key: '6',
-          name: 'Matthew "Cookie" Davis',
-          number: "1-650-576-9102",    
-        },
-      ],
+    blocked: [],
     recent: [],
     conPerms: 'All',
     tbc: "3",
@@ -60,9 +24,21 @@ const appReducer = (state = initState, action) => {
     switch (action.type) {
     
         case 'SET_CONTACTS':
+            let initContacts = action.contacts.data;
+            initContacts = initContacts.filter(element => "phoneNumbers" in element);
+            initContacts = initContacts.map(element => {
+                key = makeKey();
+                return {
+                    ...element,
+                    key: key
+                }
+            });
+            initContacts.sort(function(a, b){return a.id - b.id});
+            initContacts.map(element => console.log(element.id));
             return {
+                
                 ...state,
-                contacts: action.contacs
+                contacts: initContacts
             }
 
         case 'REMOVE_BLOCKED':
@@ -91,12 +67,8 @@ const appReducer = (state = initState, action) => {
             return {
                 ...state,
                 contacts: [...state.contacts, 
-                    {
-                        key: key,
-                        name: action.name,
-                        number: action.number,
-                        isContact: action.isContact
-                    }]
+                    action.contact
+                ]
             }
 
         case 'ADD_BLOCKED':
@@ -104,12 +76,10 @@ const appReducer = (state = initState, action) => {
             return {
                 ...state,
                 blocked: [...state.blocked, 
-                    {
-                        key: key,
-                        name: action.name,
-                        number: action.number,
-                        isContact: action.isContact
-                    }]
+                    
+                        action.contact
+                        
+                    ]
             }
 
         case 'ADD_RECENT':

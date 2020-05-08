@@ -22,8 +22,7 @@ export const removeRecent = (key) => {
 export const addContact = (contact) => {
     return {
         type: 'ADD_CONTACT',
-        name: contact.name,
-        number: contact.number,
+        contact: contact,
         isContact: true
         //icon: contact.icon
     }
@@ -32,10 +31,7 @@ export const addContact = (contact) => {
 export const addBlocked = (contact) => {
     return {
         type: 'ADD_BLOCKED',
-        name: contact.name,
-        number: contact.number,
-        isContact: contact.isContact,
-        //icon: contact.icon
+        contact: contact
     }
 }
 
