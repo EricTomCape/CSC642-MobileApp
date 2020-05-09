@@ -6,7 +6,10 @@ import { updatePermissions, updateTBC, updateCB } from "../src/actions/settingAc
 import { addRecent, trimRecent } from "../src/actions/contactActions";
 
 import { connect } from 'react-redux';
-import { SliderVolumeController } from 'react-native-volume-controller';
+
+import { Audio } from 'expo-av';
+import * as Permissions from 'expo-permissions';
+
 
 
   class Settings extends React.Component {
@@ -33,6 +36,14 @@ import { SliderVolumeController } from 'react-native-volume-controller';
           ],
         },
       }
+      
+    }
+
+    
+
+    async componentDidMount () {
+      // Ask for permission to query contacts.
+      const permission = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
     }
 
     setModal(param) {
@@ -56,7 +67,13 @@ import { SliderVolumeController } from 'react-native-volume-controller';
   }
 */
 
-    recentTest = (contact) => {
+     async recentTest(contact) {
+
+      let isBlocked = this.props.blocked.findIndex(element => element.phoneNumbers[0].number === contact.phoneNumbers[0].number);
+
+      if (isBlocked !== -1) {
+        return;
+      }
 
       let testContact = {
         ...contact,
@@ -68,22 +85,52 @@ import { SliderVolumeController } from 'react-native-volume-controller';
       let timeBetween = parseInt(this.props.tbc) * 60;
       let callsBetween = parseInt(this.props.cb);
 
-      console.log(timeBetween);
-      console.log(callsBetween);
-
       let recentArray = this.props.recent.filter(element => 
                                                 ((testContact.timeRecieved-element.timeRecieved) <= timeBetween) 
                                                 && (contact.phoneNumbers[0].number === element.phoneNumbers[0].number));
 
-      console.log(recentArray);
-      console.log()
-      if (recentArray.length >= callsBetween){
-        console.log(recentArray.length);
-        //SliderVolumeController.change(100);
+
+      //const soundObject = new Audio.Sound();
+
+
+      switch (this.props.conPerms) {
+        case "All":
+          if (recentArray.length >= callsBetween-1){
+            this.playAudio();
+          }
+          break;
+
+        case "ContactList":
+          let isContact = this.props.contacts.findIndex(element => element.phoneNumbers[0].number === contact.phoneNumbers[0].number);
+          if ((isContact !== -1) && (recentArray.length >= callsBetween-1)) {
+            this.playAudio();
+          }
+          break;
+
+        case "None":
+          //no contacts are allowed to trigger, so break.
+          break;
+      
+        default:
+          //iunno how this would happen, but if conPerms gets corrupted, break.
+          break;
       }
 
       this.props.trimRecent();
 
+    }
+
+    async playAudio() {
+      const soundObject = new Audio.Sound();
+      try {
+        await soundObject.loadAsync(require('../assets/hello-trailer_01.mp3'));
+        await soundObject.setVolumeAsync(1.0);
+        await soundObject.playAsync();
+        
+        // Your sound is playing!
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     render() {
@@ -185,6 +232,10 @@ import { SliderVolumeController } from 'react-native-volume-controller';
     </View>
     );}
   }
+
+    
+
+
 
   const mapStateToProps = (state) => {
     return {

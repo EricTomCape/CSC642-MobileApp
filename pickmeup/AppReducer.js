@@ -19,8 +19,6 @@ const appReducer = (state = initState, action) => {
 
     let key = ''
 
-    console.log(action);
-
     switch (action.type) {
     
         case 'SET_CONTACTS':
@@ -95,7 +93,6 @@ const appReducer = (state = initState, action) => {
             }
 
         case 'UPDATE_PERMISSIONS':
-            console.log(action.conPerms);
             return {
                 ...state,
                 conPerms: action.conPerms

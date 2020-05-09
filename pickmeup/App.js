@@ -11,15 +11,7 @@ import Logbook from './tabs/logbook';
 import Times from './tabs/times';
 import Settings from './tabs/settings';
 
-import CallDetectorManager from 'react-native-call-detection';
-
-
-
-
-
 const store = createStore(appReducer);
-
-
 
 const MainTabs = createMaterialTopTabNavigator();
 
